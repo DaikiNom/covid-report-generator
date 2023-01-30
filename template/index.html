@@ -83,8 +83,14 @@
         <div id="if-myself-symptom">
             <p>8.(6で「本人に症状がある」を選択した場合) 具体的な症状を選択してください</p>
             <div class="form-check form-check-inline col-md-3">
-                <input class="form-check-input" type="checkbox" name="fever" id="fever">
+                <input class="form-check-input" type="checkbox" name="fever" id="fever" onclick="chkEnabledControl('temperature'); chkEnabledControl('period')">
                 <label class="form-check-label" for="fever">発熱</label>
+                <div class="input-group">
+                    <input type="number" class="form-control" min="36.0" max="45.0" step="0.1" name="temperature" id="temperature" disabled required>
+                    <label class="input-group-text">℃が</label>
+                    <input type="number" class="form-control" id="period" name="period" disabled required>
+                    <label class="input-group-text">日間</label>
+                </div>
             </div>
             <div class="form-check form-check-inline col-md-3">
                 <input class="form-check-input" type="checkbox" name="boredom" id="boredom">
@@ -118,10 +124,9 @@
             <label for="other-reason">8.(6で「その他」を選択した場合) 理由を入力してください</label>
             <input class="form-control" id="other-reason" name="other-reason" type="text" disabled>
         </div>
-        <input class="form-control btn btn-primary" type="submit" onclick="PostData();">
+        <input class="form-control btn btn-primary" type="submit">
     </form>
 </div>
-<script src="assets/post.js"></script>
 <script src="assets/script.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
