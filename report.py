@@ -5,6 +5,7 @@ import os
 from os.path import dirname, join
 import sys
 import json
+import locale
 import PyPDF2
 from reportlab.lib.units import mm
 from reportlab.pdfgen import canvas
@@ -17,6 +18,7 @@ from datetime import date, datetime
 
 app = Flask(__name__, static_folder='./templates')
 app.config['JSON_AS_ASCII'] = False
+locale.setlocale(locale.LC_ALL, 'ja_JP.UTF-8')
 
 
 def is_checked(value):
@@ -121,11 +123,15 @@ def report():
         canv.drawRightString(62 * mm, 146.5 * mm, form_data['str-date'].strftime('%Y'))
         canv.drawRightString(76 * mm, 146.5 * mm, form_data['str-date'].strftime('%m'))
         canv.drawRightString(90.75 * mm, 146.5 * mm, form_data['str-date'].strftime('%d'))
-        # canv.drawString(270, 430, form_data['str-date'].strftime('%a'))
+
+        canv.drawString(99 * mm, 146.5 * mm, form_data['str-date'].strftime('%a'))
+
         canv.drawRightString(128.34 * mm, 146.5 * mm, form_data['ed-date'].strftime('%Y'))
         canv.drawRightString(142.75 * mm, 146.5 * mm, form_data['ed-date'].strftime('%m'))
         canv.drawRightString(157.25 * mm, 146.5 * mm, form_data['ed-date'].strftime('%d'))
-        # canv.drawString(467, 430, form_data['ed-date'].strftime('%a'))
+
+        canv.drawString(165.5 * mm, 146.5 * mm, form_data['ed-date'].strftime('%a'))
+
         reason = form_data['sel-reason']
         if reason == 'myself':
             check(27.3 * mm, 125.3 * mm)
@@ -140,7 +146,9 @@ def report():
         canv.drawRightString(85. * mm, 167.5 * mm, form_data['onset-date'].strftime('%Y'))
         canv.drawRightString(106 * mm, 167.5 * mm, form_data['onset-date'].strftime('%m'))
         canv.drawRightString(124 * mm, 167.5 * mm, form_data['onset-date'].strftime('%d'))
-        # canv.drawString(372.5, 372, form_daa['onset-date'].strftime('%a'))
+
+        canv.drawString(134 * mm, 167.5 * mm, form_data['onset-date'].strftime('%a'))
+
         if form_data['fever'] == 'true':
             check(34.3 * mm, 118.4 * mm)
             canv.drawRightString(58.74 * mm, 118.79 * mm, form_data['temperature'])
