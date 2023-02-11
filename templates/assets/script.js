@@ -42,6 +42,12 @@ function selectChanged(select) {
         document.getElementById('if-other').style.display = "none";
         document.getElementById('if-myself-onset').style.display = "block";
         document.getElementById('if-myself-symptom').style.display = "block";
+        if (document.getElementById('fever').checked) {
+            document.getElementById('temperature').disabled = 'enabled';
+            document.getElementById('temperature').value = '';
+            document.getElementById('period').disabled = 'enabled';
+            document.getElementById('period').value = '';
+        }
     } else {
         document.getElementById('if-other').style.display = "none";
         document.getElementById('if-myself-onset').style.display = "none";

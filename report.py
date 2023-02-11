@@ -1,10 +1,6 @@
 # Author: @09_Aimer
 # !/usr/local/bin/python3
 # coding: utf-8
-import os
-from os.path import dirname, join
-import sys
-import json
 import locale
 import PyPDF2
 from reportlab.lib.units import mm
@@ -12,9 +8,9 @@ from reportlab.pdfgen import canvas
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.lib.pagesizes import A4
-from flask import Flask, abort, request, render_template, make_response
+from flask import Flask, request, render_template, make_response
 from io import BytesIO
-from datetime import date, datetime
+from datetime import datetime
 
 app = Flask(__name__, static_folder='./templates')
 app.config['JSON_AS_ASCII'] = False
@@ -111,7 +107,7 @@ def report():
 
     # function for write check
     def check(x, y):
-        canv.drawString(x, y, '◯')
+        canv.drawString(x, y, '✓')
 
     def write_required():
         # 曜日入れるのはあとで(ここ重要
@@ -188,7 +184,7 @@ def report():
     pdf_writer.write(new_pdf)
     response = make_response(new_pdf.getvalue())
     response.headers['Content-Type'] = 'application/pdf'
-    response.headers['Content-Disposition'] = 'attachment; filename=covid-report.pdf'
+    response.headers['Content-Disposition'] = 'filename=covid-report.pdf'
     return response
 
 
