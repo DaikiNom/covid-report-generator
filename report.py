@@ -30,6 +30,23 @@ def is_checked(value):
     else:
         return 'true'
 
+def convert_dayofweek(value):
+    if value == 'Mon':
+        return '月'
+    elif value == 'Tue':
+        return '火'
+    elif value == 'Wed':
+        return '水'
+    elif value == 'Thu':
+        return '木'
+    elif value == 'Fri':
+        return '金'
+    elif value == 'Sat':
+        return '土'
+    elif value == 'Sun':
+        return '日'
+    else:
+        return ''
 
 @app.route("/")
 def start():
@@ -38,7 +55,6 @@ def start():
 
 @app.route("/report", methods=['POST'])
 def report():
-    locale.setlocale(locale.LC_TIME, 'Japanese_Japan.932')
     user_grade = request.form.get('grade')
     user_class = request.form.get('class')
     user_number = request.form.get('number')
@@ -89,13 +105,13 @@ def report():
         canv.drawRightString(83.1 * mm, 176.5 * mm, form_data['str-date'].strftime('%m'))
         canv.drawRightString(97.9 * mm, 176.5 * mm, form_data['str-date'].strftime('%d'))
 
-        canv.drawString(108 * mm, 176.5 * mm, form_data['str-date'].strftime('%a'))
+        canv.drawString(108 * mm, 176.5 * mm, convert_dayofweek(form_data['str-date'].strftime('%a')))
 
         canv.drawRightString(135.5 * mm, 176.5 * mm, form_data['ed-date'].strftime('%Y'))
         canv.drawRightString(150.2 * mm, 176.5 * mm, form_data['ed-date'].strftime('%m'))
         canv.drawRightString(164.9 * mm, 176.5 * mm, form_data['ed-date'].strftime('%d'))
 
-        canv.drawString(174.5 * mm, 176.5 * mm, form_data['ed-date'].strftime('%a'))
+        canv.drawString(174.5 * mm, 176.5 * mm, convert_dayofweek(form_data['ed-date'].strftime('%a')))
 
         reason = form_data['sel-reason']
         if reason == 'myself':
@@ -114,7 +130,7 @@ def report():
         canv.drawRightString(102.3 * mm, 196.0 * mm, form_data['os-date'].strftime('%Y'))
         canv.drawRightString(117.5 * mm, 196.0 * mm, form_data['os-date'].strftime('%m'))
         canv.drawRightString(132.8 * mm, 196.0 * mm, form_data['os-date'].strftime('%d'))
-        canv.drawRightString(149.0 * mm, 196.0 * mm, form_data['os-date'].strftime('%a'))
+        canv.drawRightString(149.0 * mm, 196.0 * mm, convert_dayofweek(form_data['os-date'].strftime('%a')))
 
     write_required()
     if form_data['sel-reason'] == 'myself':
