@@ -14,7 +14,7 @@ from datetime import datetime
 
 app = Flask(__name__, static_folder='./templates')
 app.config['JSON_AS_ASCII'] = False
-locale.setlocale(locale.LC_TIME, 'Japanese_Japan.UTF-8')
+#locale.setlocale(locale.LC_ALL, 'ja_JP.UTF-8')
 
 def prepare_response(data):
     response = make_response(data)
