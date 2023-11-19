@@ -3,6 +3,8 @@
 document.getElementById('if-myself-onset').style.display = "none";
 document.getElementById('hospital-name').disabled = true;
 document.getElementById('os-date').disabled = true;
+document.getElementById('hospital-name').required = false;
+document.getElementById('os-date').required = false;
 
 window.onload = function () {
   var today = new Date();
@@ -39,6 +41,8 @@ document.getElementById('submit').addEventListener('click', (function () {
 // switch what is displayed based on the select value
 function selectChanged(select) {
   if (select === "myself") {
+    document.getElementById('hospital-name').required = true;
+    document.getElementById('os-date').required = true;
     document.getElementById('hospital-name').disabled = false;
     document.getElementById('os-date').disabled = false;
     document.getElementById('if-myself-onset').style.display = "block";
@@ -46,6 +50,10 @@ function selectChanged(select) {
     document.getElementById('if-myself-onset').style.display = "none";
     document.getElementById('if-myself-onset').disabled = true;
     document.getElementById('os-date').disabled = true;
+    document.getElementById('hospital-name').value = "";
+    document.getElementById('os-date').value = "";
+    document.getElementById('hospital-name').required = false;
+    document.getElementById('os-date').required = false;
   }
 }
 
