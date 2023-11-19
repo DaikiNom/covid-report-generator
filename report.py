@@ -14,7 +14,6 @@ from datetime import datetime
 
 app = Flask(__name__, static_folder='./templates')
 app.config['JSON_AS_ASCII'] = False
-#locale.setlocale(locale.LC_ALL, 'ja_JP.UTF-8')
 
 def prepare_response(data):
     response = make_response(data)
@@ -39,6 +38,7 @@ def start():
 
 @app.route("/report", methods=['POST'])
 def report():
+    locale.setlocale(locale.LC_TIME, 'ja_JP.UTF-8')
     user_grade = request.form.get('grade')
     user_class = request.form.get('class')
     user_number = request.form.get('number')
@@ -136,4 +136,4 @@ def report():
     return response
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run()
