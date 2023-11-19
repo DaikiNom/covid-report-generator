@@ -38,7 +38,7 @@ def start():
 
 @app.route("/report", methods=['POST'])
 def report():
-    locale.setlocale(locale.LC_TIME, 'ja_JP.UTF-8')
+    locale.setlocale(locale.LC_TIME, 'Japanese_Japan.932')
     user_grade = request.form.get('grade')
     user_class = request.form.get('class')
     user_number = request.form.get('number')
