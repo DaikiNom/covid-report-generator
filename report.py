@@ -1,4 +1,4 @@
-# Author: @09_Aimer
+# Author: Daiki Nomura
 # !/usr/local/bin/python3
 # coding: utf-8
 import locale
@@ -16,6 +16,14 @@ app = Flask(__name__, static_folder='./templates')
 app.config['JSON_AS_ASCII'] = False
 locale.setlocale(locale.LC_ALL, 'ja_JP.UTF-8')
 
+def prepare_response(data):
+    response = make_response(data)
+    response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
+    response.headers['Content-Security-Policy'] = "default-src 'self' https://cdn.jsdelivr.net https://fonts.googleapis.com https://fonts.gstatic.com; style-src: 'self' https://fonts.googleapis.com https://fonts.gstatic.com; font-src: 'self' https://fonts.gstatic.com; img-src: 'self' data:; frame-src: 'self'; script-src 'self' https://cdn.jsdelivr.net https://fonts.googleapis.com https://fonts.gstatic.com unsafe-inline 'nonce-371c39bd8dc29b14542d774a83cc5781f59fd261b492e4cedf841198696d4d7b'; object-src: 'none'; base-uri: 'none'; form-action: self;"
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+    response.headers['X-XSS-Protection'] = '1; mode=block'
+    return response
 
 def is_checked(value):
     if value is None:
@@ -26,7 +34,7 @@ def is_checked(value):
 
 @app.route("/")
 def start():
-    return render_template("index.html", name='name')
+    return prepare_response(render_template('index.html'))
 
 
 @app.route("/report", methods=['POST'])
@@ -41,39 +49,8 @@ def report():
     reason_sel = request.form.get('sel-reason')
 
     if reason_sel == "myself":
+        hospital_name = request.form.get('hospital-name')
         onset_date = datetime.strptime(request.form.get('os-date'), '%Y-%m-%d')
-        was_fever = is_checked(request.form.get('fever'))
-        if was_fever == 'true':
-            fever_temp = request.form.get('temperature')
-            fever_period = request.form.get('period')
-        else:
-            fever_temp = ""
-            fever_period = ""
-        was_boredom = is_checked(request.form.get('boredom'))
-        was_dyspnea = is_checked(request.form.get('dyspnea'))
-        was_dysgeusia = is_checked(request.form.get('dysgeusia'))
-        was_cough = is_checked(request.form.get('cough'))
-        was_sore_throat = is_checked(request.form.get('sore-throat'))
-        if is_checked(request.form.get('chbox-otsym')) == 'true':
-            was_other = request.form.get('other-symptom')
-        else:
-            was_other = ""
-    else:
-        onset_date = ""
-        was_fever = ""
-        fever_temp = ""
-        fever_period = ""
-        was_boredom = ""
-        was_dyspnea = ""
-        was_dysgeusia = ""
-        was_cough = ""
-        was_sore_throat = ""
-        was_other = ""
-
-    if reason_sel == "other":
-        reason_other = request.form.get('other-reason')
-    else:
-        reason_other = ""
 
     # make json
     form_data = {
@@ -85,17 +62,8 @@ def report():
         'str-date': start_date,
         'ed-date': end_date,
         'sel-reason': reason_sel,
-        'onset-date': onset_date,
-        'fever': was_fever,
-        'temperature': fever_temp,
-        'period': fever_period,
-        'boredom': was_boredom,
-        'dyspnea': was_dyspnea,
-        'dysgeusia': was_dysgeusia,
-        'cough': was_cough,
-        'sore-throat': was_sore_throat,
-        'other-symptom': was_other,
-        'other-reason': reason_other
+        'hospital-name': hospital_name if reason_sel == "myself" else None,
+        'os-date': onset_date if reason_sel == "myself" else None
     }
     # for PDF making
     pdf_reader = PyPDF2.PdfReader(open('./resource/covid-report.pdf', 'rb'), strict=False)
@@ -105,72 +73,52 @@ def report():
     pdfmetrics.registerFont(TTFont('IPAexGothic', './resource/ipaexg.ttf'))
     canv.setFont('IPAexGothic', 12)
 
-    # function for write check
+    # function for write circle like check
     def check(x, y):
-        canv.drawString(x, y, '✓')
+        canv.setLineWidth(2.0)
+        canv.circle(x, y, 2.0 * mm, stroke=1, fill=0)
 
     def write_required():
         # 曜日入れるのはあとで(ここ重要
-        canv.drawRightString(154.02 * mm, 223.35 * mm, form_data['grade'])
-        canv.drawRightString(164.64 * mm, 223.35 * mm, form_data['class'])
-        canv.drawRightString(175.35 * mm, 223.35 * mm, form_data['number'])
-        canv.drawString(136.70 * mm, 209.3 * mm, form_data['st-name'])
-        canv.drawString(136.70 * mm, 195.8 * mm, form_data['pr-name'])
-        canv.drawRightString(62 * mm, 146.5 * mm, form_data['str-date'].strftime('%Y'))
-        canv.drawRightString(76 * mm, 146.5 * mm, form_data['str-date'].strftime('%m'))
-        canv.drawRightString(90.75 * mm, 146.5 * mm, form_data['str-date'].strftime('%d'))
+        canv.drawRightString(151.8 * mm, 240.5 * mm, form_data['grade'])
+        canv.drawRightString(163.3 * mm, 240.5 * mm, form_data['class'])
+        canv.drawRightString(174.7 * mm, 240.5 * mm, form_data['number'])
+        canv.drawString(134.0 * mm, 228.2 * mm, form_data['st-name'])
+        canv.drawString(134.0 * mm, 215.2 * mm, form_data['pr-name'])
+        canv.drawRightString(68.5 * mm, 176.5 * mm, form_data['str-date'].strftime('%Y'))
+        canv.drawRightString(83.1 * mm, 176.5 * mm, form_data['str-date'].strftime('%m'))
+        canv.drawRightString(97.9 * mm, 176.5 * mm, form_data['str-date'].strftime('%d'))
 
-        canv.drawString(99 * mm, 146.5 * mm, form_data['str-date'].strftime('%a'))
+        canv.drawString(108 * mm, 176.5 * mm, form_data['str-date'].strftime('%a'))
 
-        canv.drawRightString(128.34 * mm, 146.5 * mm, form_data['ed-date'].strftime('%Y'))
-        canv.drawRightString(142.75 * mm, 146.5 * mm, form_data['ed-date'].strftime('%m'))
-        canv.drawRightString(157.25 * mm, 146.5 * mm, form_data['ed-date'].strftime('%d'))
+        canv.drawRightString(135.5 * mm, 176.5 * mm, form_data['ed-date'].strftime('%Y'))
+        canv.drawRightString(150.2 * mm, 176.5 * mm, form_data['ed-date'].strftime('%m'))
+        canv.drawRightString(164.9 * mm, 176.5 * mm, form_data['ed-date'].strftime('%d'))
 
-        canv.drawString(165.5 * mm, 146.5 * mm, form_data['ed-date'].strftime('%a'))
+        canv.drawString(174.5 * mm, 176.5 * mm, form_data['ed-date'].strftime('%a'))
 
         reason = form_data['sel-reason']
         if reason == 'myself':
-            check(27.3 * mm, 125.3 * mm)
+            check(33.8 * mm, 152.4 * mm)
+        elif reason == 'medical-care':
+            check(41.4 * mm, 133.7 * mm)
+        elif reason == 'primary-illness':
+            check(41.4 * mm, 127.3 * mm)
         elif reason == 'family':
-            check(27.3 * mm, 90.5 * mm)
-        elif reason == 'prevention':
-            check(27.3 * mm, 81.25 * mm)
-        elif reason == 'other':
-            check(27.3 * mm, 74.25 * mm)
+            check(41.4 * mm, 120.9 * mm)
+        elif reason == 'vaccine':
+            check(33.8 * mm, 108.1 * mm)
 
     def write_if_myself():
-        canv.drawRightString(85. * mm, 167.5 * mm, form_data['onset-date'].strftime('%Y'))
-        canv.drawRightString(106 * mm, 167.5 * mm, form_data['onset-date'].strftime('%m'))
-        canv.drawRightString(124 * mm, 167.5 * mm, form_data['onset-date'].strftime('%d'))
-
-        canv.drawString(134 * mm, 167.5 * mm, form_data['onset-date'].strftime('%a'))
-
-        if form_data['fever'] == 'true':
-            check(34.3 * mm, 118.4 * mm)
-            canv.drawRightString(58.74 * mm, 118.79 * mm, form_data['temperature'])
-            canv.drawRightString(77.22 * mm, 118.79 * mm, form_data['period'])
-        if form_data['boredom'] == 'true':
-            check(111.17 * mm, 118.4 * mm)
-        if form_data['dyspnea'] == 'true':
-            check(34.3 * mm, 111.5 * mm)
-        if form_data['dysgeusia'] == 'true':
-            check(111.17 * mm, 111.5 * mm)
-        if form_data['cough'] == 'true':
-            check(34.3 * mm, 104.5 * mm)
-        if form_data['sore-throat'] == 'true':
-            check(111.17 * mm, 104.5 * mm)
-        if form_data['other-symptom'] != '':
-            check(34.3 * mm, 97.5 * mm)
-            canv.drawString(52.34 * mm, 97.24 * mm, form_data['other-symptom'])
-
-    def write_if_other():
-        canv.drawString(52 * mm, 74.15 * mm, form_data['other-reason'])
+        canv.drawString(124.0 * mm, 151.2 * mm, form_data['hospital-name'])
+        canv.drawRightString(102.3 * mm, 196.0 * mm, form_data['os-date'].strftime('%Y'))
+        canv.drawRightString(117.5 * mm, 196.0 * mm, form_data['os-date'].strftime('%m'))
+        canv.drawRightString(132.8 * mm, 196.0 * mm, form_data['os-date'].strftime('%d'))
+        canv.drawRightString(149.0 * mm, 196.0 * mm, form_data['os-date'].strftime('%a'))
 
     write_required()
     if form_data['sel-reason'] == 'myself':
         write_if_myself()
-    elif form_data['sel-reason'] == 'other':
-        write_if_other()
 
     canv.showPage()
     canv.save()
@@ -182,11 +130,10 @@ def report():
     out_put.close()
     new_pdf = BytesIO()
     pdf_writer.write(new_pdf)
-    response = make_response(new_pdf.getvalue())
+    response = prepare_response(new_pdf.getvalue())
     response.headers['Content-Type'] = 'application/pdf'
     response.headers['Content-Disposition'] = 'filename=covid-report.pdf'
     return response
 
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run(debug=True)

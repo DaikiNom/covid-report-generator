@@ -1,169 +1,98 @@
-<!-- Author:@09_Aimer-->
+<!-- Author: Daiki Nomura-->
 <!DOCTYPE html>
 <html lang="jp">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="og:title" content="出席停止報告書ジェネレータ">
     <meta name="og:type" content="website">
-    <meta name="og:url" content="https://fukakai.com/covid-report/index.py">
-    <meta name="og:image" content="">
     <meta name="og:site_name" content="出席停止報告書ジェネレータ">
-    <meta name="og:description" content="出席停止報告書ジェネレータ">
+    <meta name="og:description" content="二松学舎柏高校でCOVID-19により出席停止した生徒の報告用紙を生成します">
     <meta name="description" content="出席停止報告書ジェネレータ">
     <meta name="keywords" content="出席停止報告書ジェネレータ">
-    <meta name="author" content="09_Aimer">
     <meta name="twitter:card" content="summary">
-    <meta name="twitter:creator" content="@09_Aimer">
-    <link rel="icon" href="assets/icon.png">
+    <link rel="icon" href="{{url_for('static', filename='assets/icon.png')}}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
-          integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
-    <link rel="stylesheet" href="assets/style.css">
-    <script>
-        (function (d) {
-            var config = {
-                    kitId: 'lre6uul',
-                    scriptTimeout: 3000,
-                    async: true
-                },
-                h = d.documentElement, t = setTimeout(function () {
-                    h.className = h.className.replace(/\bwf-loading\b/g, "") + " wf-inactive";
-                }, config.scriptTimeout), tk = d.createElement("script"), f = false,
-                s = d.getElementsByTagName("script")[0], a;
-            h.className += " wf-loading";
-            tk.src = 'https://use.typekit.net/' + config.kitId + '.js';
-            tk.async = true;
-            tk.onload = tk.onreadystatechange = function () {
-                a = this.readyState;
-                if (f || a && a != "complete" && a != "loaded") return;
-                f = true;
-                clearTimeout(t);
-                try {
-                    Typekit.load(config)
-                } catch (e) {
-                }
-            };
-            s.parentNode.insertBefore(tk, s)
-        })(document);
-    </script>
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link rel="stylesheet" href="{{url_for('static', filename='assets/style.css')}}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New&display=swap" rel="stylesheet">
     <title>出席停止報告書ジェネレータ</title>
 </head>
 
 <body>
-<div id="title">
-    <h1>出席停止報告書ジェネレータ</h1>
-    <p>二松學舍柏高校でCOVID-19により出席停止した生徒の報告用紙を生成します<br>
-        生成したPDFを印刷し，印鑑を押して担任へ提出してください</p>
-</div>
-<div class="container">
-    <form action='/report' method="post" class="row g-3 needs-validation" id="input-form" novalidate>
-        <div class="col-md-4">
-            <label for="belong">1.学年・クラス・番号を入力してください</label>
-            <div class="input-group" id="belong">
-                <input type="number" class="form-control" placeholder="1" name="grade" aria-label="User Grade" required>
-                <span class="input-group-text">年</span>
-                <input type="number" class="form-control" placeholder="1" name="class" aria-label="User Class" required>
-                <span class="input-group-text">組</span>
-                <input type="number" class="form-control" placeholder="1" name="number" aria-label="User Number"
-                       required>
-                <span class="input-group-text">番</span>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <label for="st-name">2.生徒氏名を入力してください</label>
-            <input type="text" class="form-control" name="st-name" id="st-name" placeholder="鵜飼　成海" required>
-        </div>
-        <div class="col-md-4">
-            <label for="pr-name">3.保護者氏名を入力してください</label>
-            <input type="text" class="form-control" name="pr-name" id="pr-name" placeholder="鵜飼　紗耶華" required>
-        </div>
-        <div class="col-md-6">
-            <label for="str-date">4.初めて休んだ日を選択してください</label>
-            <input type="date" class="form-control" name="str-date" id="str-date" value="<?php echo date('Y-m-d'); ?>"
-                   required>
-        </div>
-        <div class="col-md-6">
-            <label for="ed-date">5.最後に休んだ日を選択してください</label>
-            <input type="date" class="form-control" name="ed-date" id="ed-date" value="<?php echo date('Y-m-d'); ?>"
-                   required>
-        </div>
-        <div class="col-md-12">
-            <label for="reason-1">6.休んだ理由を選択してください</label>
-            <select class="form-select" name="sel-reason" id="reason-1" aria-label="Select Reason"
-                    onchange="selectChanged(this.value);">
-                <option selected>選択してください</option>
-                <option value="myself">本人に症状があったため</option>
-                <option value="family">家族に症状があったため</option>
-                <option value="prevention">症状はないが，感染予防のため</option>
-                <option value="other">その他</option>
-            </select>
-        </div>
-        <div class="col-md-12" id="if-myself-onset">
-            <label for="os-date">7.(6で「本人に症状がある」を選択した場合) 発症日を選択してください</label>
-            <input type="date" class="form-control" name="os-date" id="os-date" value="<?php echo date('Y-m-d'); ?>">
-        </div>
-        <div id="if-myself-symptom">
-            <p>8.(6で「本人に症状がある」を選択した場合) 具体的な症状を選択してください</p>
-            <div class="form-check form-check-inline col-md-3">
-                <input class="form-check-input" type="checkbox" name="fever" id="fever"
-                       onclick="chkEnabledControl('temperature'); chkEnabledControl('period')">
-                <label class="form-check-label" for="fever">発熱</label>
-                <div class="input-group">
-                    <input type="number" class="form-control" min="36.0" max="45.0" step="0.1" name="temperature"
-                           id="temperature" disabled required>
-                    <label for="temperature" class="input-group-text">℃が</label>
-                    <input type="number" class="form-control" id="period" name="period" disabled required>
-                    <label for="period" class="input-group-text">日間</label>
+    <div id="title">
+        <h1>出席停止報告書ジェネレータ</h1>
+        <p>二松学舎柏高校でCOVID-19により出席停止した生徒の報告用紙を生成します<br>
+            生成したPDFを印刷し，印鑑を押して担任へ提出してください<br>
+            (入力したデータは，安全にサーバに送信され，データの生成後直ちに破棄されます．)</p>
+    </div>
+    <div class="container">
+        <form action='/report' method="post" class="row g-3 needs-validation" id="input-form" novalidate>
+            <div class="col-md-4">
+                <label for="belong">1.学年・クラス・番号を入力してください</label>
+                <div class="input-group" id="belong">
+                    <input type="number" class="form-control" placeholder="1" name="grade" aria-label="User Grade"
+                        required>
+                    <span class="input-group-text">年</span>
+                    <input type="number" class="form-control" placeholder="1" name="class" aria-label="User Class"
+                        required>
+                    <span class="input-group-text">組</span>
+                    <input type="number" class="form-control" placeholder="1" name="number" aria-label="User Number"
+                        required>
+                    <span class="input-group-text">番</span>
                 </div>
             </div>
-            <div class="form-check form-check-inline col-md-3">
-                <input class="form-check-input" type="checkbox" name="boredom" id="boredom">
-                <label class="form-check-label" for="boredom">倦怠感</label>
+            <div class="col-md-4">
+                <label for="st-name">2.生徒氏名を入力してください</label>
+                <input type="text" class="form-control" name="st-name" id="st-name" placeholder="三島　中洲" required>
             </div>
-            <div class="form-check form-check-inline col-md-3">
-                <input class="form-check-input" type="checkbox" name="dyspnea" id="dyspnea">
-                <label class="form-check-label" for="dyspnea">息苦しさ(呼吸困難)</label>
+            <div class="col-md-4">
+                <label for="pr-name">3.保護者氏名を入力してください</label>
+                <input type="text" class="form-control" name="pr-name" id="pr-name" placeholder="三島　中洲" required>
             </div>
-            <div class="form-check form-check-inline col-md-3">
-                <input class="form-check-input" type="checkbox" name="dysgeusia" id="dysgeusia">
-                <label class="form-check-label" for="dysgeusia">味覚・嗅覚の異常</label>
+            <div class="col-md-6">
+                <label for="str-date">4.初めて休んだ日を選択してください</label>
+                <input type="date" class="form-control" name="str-date" id="str-date" required>
             </div>
-            <div class="form-check form-check-inline col-md-3">
-                <input class="form-check-input" type="checkbox" name="cough" id="cough">
-                <label class="form-check-label" for="cough">せき</label>
-            </div>
-            <div class="form-check form-check-inline col-md-3">
-                <input class="form-check-input" type="checkbox" name="sore-throat" id="sore-throat">
-                <label class="form-check-label" for="sore-throat">のどの痛み</label>
+            <div class="col-md-6">
+                <label for="ed-date">5.最後に休んだ日を選択してください</label>
+                <input type="date" class="form-control" name="ed-date" id="ed-date" required>
             </div>
             <div class="col-md-12">
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" value=""
-                           onclick="chkEnabledControl('other-symptom');" aria-label="Checkbox for following text input"
-                           name="chbox-otsym" id="chbox-otsym">
-                    <label class="form-check-label" for="chbox-otsym">その他</label>
-                </div>
-                <input type="text" id="other-symptom" name="other-symptom" class="form-control" disabled
-                       placeholder="喀血, 嘔吐, 鼻閉, 結膜充血, 重症化に伴う急性呼吸窮迫症候群"
-                       aria-label="Text input with chbox-othtext">
+                <label for="sel-reason">6.休んだ理由を選択してください</label>
+                <select class="form-select" name="sel-reason" id="sel-reason" aria-label="Select Reason">
+                    <option selected>選択してください</option>
+                    <option value="myself">本人が感染した</option>
+                    <option value="medical-care">医療的ケアを必要とし，重症化リスクが高いと主治医が判断した</option>
+                    <option value="primary-illness">基礎疾患により重症化リスクが高いと主治医が判断した</option>
+                    <option value="family">同居家族に高齢者や基礎疾患がある者がいる(事前に校長の許可を受けている)</option>
+                    <option value="vaccine">ワクチン接種を受けた</option>
+                </select>
             </div>
-        </div>
-        <div class="col-md" id="if-other">
-            <label for="other-reason">8.(6で「その他」を選択した場合) 理由を入力してください</label>
-            <input class="form-control" id="other-reason" name="other-reason" type="text" disabled required>
-        </div>
-        <button type="submit" class="btn btn-primary" id="submit">送信</button>
-    </form>
-</div>
-<script src="assets/script.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+            <div class="col-md-12" id="if-myself-onset">
+                <label for="hospital-name">7.(6で「本人に症状がある」を選択した場合) 受診した医療機関名を入力してください</label>
+                <input type="text" class="form-control" name="hospital-name" id="hospital-name" placeholder="二松學舍大学病院"
+                    disabled required>
+                <label for="os-date">8.(6で「本人に症状がある」を選択した場合) 発症日を入力してください</label>
+                <input type="date" class="form-control" name="os-date" id="os-date" disabled required>
+            </div>
+            <button type="submit" class="btn btn-primary" id="submit">送信</button>
+        </form>
+    </div>
+    <script nonce="371c39bd8dc29b14542d774a83cc5781f59fd261b492e4cedf841198696d4d7b"
+        src="{{url_for('static', filename='assets/script.js')}}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
         crossorigin="anonymous"></script>
 </body>
 
 <footer>
-    <p>Copyright © 2023 <a href="https://twitter.com/09_Aimer">@09_Aimer</a></p>
+    <p>Copyright © 2023 Daiki Nomura</p>
     <p>Powered by <a href="https://nishogakusha-kashiwa.ed.jp" target="_new" rel="noopener noreferrer">Nishogakusha
-        Kashiwa High School</a></p>
+            Kashiwa High School</a></p>
 </footer>
+
 </html>
